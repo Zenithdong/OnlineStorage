@@ -1,0 +1,22 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/Server",
+                "C:/Program Files/MySQL/MySQL Server 8.0/include"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "compilerPath": "g++",
+            "cStandard": "17",
+            "cppStandard": "17",
+            "intelliSenseMode": "gcc-x64"
+        }
+    ],
+    "version": 4
+}

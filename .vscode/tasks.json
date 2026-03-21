@@ -1,0 +1,30 @@
+{
+    "tasks": [
+        {
+            "type": "cppbuild",
+            "label": "C/C++: g++.exe build active file",
+            "command": "g++",
+            "args": [
+                "-g",
+                "${workspaceFolder}\\Server\\main.cpp",
+                "${workspaceFolder}\\Server\\netWork\\tcpnet.cpp",
+                "${workspaceFolder}\\Server\\CMySQL\\cmysql.cpp",
+                "-o",
+                "${workspaceFolder}\\Server\\Server.exe",
+                "-lws2_32",
+                "-IC:/Program Files/MySQL/MySQL Server 8.0/include",
+                "-LC:/Program Files/MySQL/MySQL Server 8.0/lib",
+                "-lmysql"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": ["$gcc"],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ],
+    "version": "2.0.0"
+}
