@@ -1,93 +1,126 @@
-# 网盘服务器 (OnlineStorage Server)
+# 服务端文档 (Server)
 
-## 项目简介
+## 主体类架构
 
-这是一个基于 Windows 的网盘服务器应用程序，采用 TCP 协议与客户端通信，数据存储使用 MySQL 数据库。
+```
+┌─────────────────────────────────────────────────────────────┐
+│                         main.cpp                            │
+│                       (程序入口)                             │
+└────────────────────────────┬────────────────────────────────┘
+                             │
+         ┌───────────────────┼───────────────────┐
+         ▼                   ▼                   ▼
+┌──────────────┐    ┌──────────────┐    ┌──────────────┐
+│   TCPNet     │    │    CMySQL    │    │ FileHelper   │
+│  (网络通信)   │    │   (数据库)    │    │  (文件操作)   │
+└──────┬───────┘    └──────────────┘    └──────────────┘
+       │
+       ▼
+┌──────────────┐
+│   Package    │
+│  (数据包)     │
+│ - m_len      │
+│ - m_data     │
+│ - m_type     │
+│ - m_UserId   │
+└──────────────┘
+```
 
-## 功能特性
+## 核心类说明
 
-- **TCP 网络通信**：支持多客户端连接，使用 `select()` 模型实现并发处理
-- **MySQL 数据库**：用户管理、文件元数据存储
-- **自定义协议**：使用长度前缀数据包格式，确保数据完整性
-- **端口 8899**：默认监听端口
+### TCPNet（网络通信类）
+
+负责 TCP 连接的建立和数据收发。
+
+| 方法 | 说明 |
+|------|------|
+| `InitNetWork()` | 初始化网络，绑定端口 8899 |
+| `UnitNetWork()` | 关闭网络连接 |
+| `sendData()` | 发送数据（长度前缀协议） |
+| `recvData()` | 接收数据 |
+
+- 使用 `select()` 模型处理多客户端
+- 默认端口：**8899**
+- 内部线程：`ThreadSelect` 监控套接字事件
+
+### CMySQL（数据库类）
+
+负责与 MySQL 数据库的连接和操作。
+
+| 方法 | 说明 |
+|------|------|
+| `ConnectMySql()` | 连接数据库 |
+| `DisConnect()` | 断开连接 |
+| `SelectMysql()` | 执行 SELECT 查询 |
+| `UpdateMysql()` | 执行 INSERT/UPDATE/DELETE |
+
+### Package（数据包类）
+
+| 成员 | 类型 | 说明 |
+|------|------|------|
+| `m_len` | int | 数据包长度 |
+| `m_data` | char* | 数据内容 |
+| `m_type` | int | 数据包类型 |
+| `m_UserId` | int | 用户ID |
+
+### FileHelper（文件操作类）
+
+负责文件的读写和管理（待扩展）。
 
 ## 目录结构
 
 ```
-OnlineStorage/
-├── Server/
-│   ├── main.cpp           # 程序入口
-│   ├── netWork/           # 网络通信模块
-│   │   ├── tcpnet.h
-│   │   └── tcpnet.cpp
-│   └── CMySQL/            # 数据库模块
-│       ├── cmysql.h
-│       └── cmysql.cpp
-├── CMakeLists.txt         # CMake 构建配置
-└── .vscode/               # VSCode 配置
-    ├── tasks.json         # 构建任务
-    ├── launch.json        # 调试配置
-    └── c_cpp_properties.json
+Server/
+├── main.cpp           # 程序入口
+├── netWork/
+│   ├── tcpnet.h       # 网络类头文件
+│   └── tcpnet.cpp     # 网络类实现
+├── CMySQL/
+│   ├── cmysql.h       # 数据库类头文件
+│   └── cmysql.cpp     # 数据库类实现
+└── README.md          # 本文档
 ```
 
-## 环境要求
+## 构建与运行
 
-- **操作系统**：Windows
-- **编译器**：MinGW-w64 (g++)
-- **数据库**：MySQL Server 8.0
-- **依赖库**：
-  - Winsock2 (`ws2_32.lib`)
-  - MySQL Connector/C
+### 环境要求
 
-## 构建方式
+- Windows 操作系统
+- MinGW-w64 编译器
+- MySQL Server 8.0
+- 依赖库：Winsock2、MySQL Connector/C
 
-### 方式一：VSCode 构建
+### VSCode 构建
 
-1. 用 VSCode 打开 `D:\Project_C++\OnlineStorage` 文件夹
-2. 按 `Ctrl+Shift+B` 执行默认构建任务
-3. 可执行文件输出到 `Server\Server.exe`
+按 `Ctrl+Shift+B` 执行构建。
 
-### 方式二：CMake 构建
+### CMake 构建
 
 ```bash
-cd D:\Project_C++\OnlineStorage
-mkdir build
-cd build
+mkdir build && cd build
 cmake ..
 cmake --build .
 ```
 
-## 运行方式
+### 运行
 
-1. 确保 MySQL 服务正在运行
-2. 确保数据库已创建并配置好相应表结构
-3. 运行 `Server\Server.exe`
-4. 服务器将在端口 8899 监听
-
-## 数据库配置
-
-代码中 MySQL 路径硬编码为：`C:/Program Files/MySQL/MySQL Server 8.0/`
-
-如需修改数据库连接，请编辑 `Server/CMySQL/cmysql.cpp` 中的连接参数。
+1. 确保 MySQL 服务运行中
+2. 配置数据库连接参数
+3. 运行 `Server.exe`
+4. 服务端监听端口 8899
 
 ## 网络协议
 
 ### 数据包格式
 
-| 字节数 | 内容 |
-|--------|------|
-| 4 字节 | 包长度 (int，大端序) |
-| N 字节 | 包内容 |
+| 字节 | 内容 |
+|------|------|
+| 0-3 | 包长度 (int) |
+| 4-? | 包内容 |
 
 ### 通信流程
 
-1. 客户端连接服务器 (端口 8899)
-2. 客户端发送数据包（先长度后内容）
+1. 客户端连接 `ServerIP:8899`
+2. 客户端发送：长度(4字节) + 内容
 3. 服务器接收并处理
 4. 服务器可选择发送响应
-
-## 注意事项
-
-- 本项目原为 Qt 项目，已转换为标准 C++ 以支持 VSCode 编译
-- MySQL 库路径在配置文件中硬编码，如安装路径不同请自行修改
-- 服务器使用 `select()` 模型，单线程处理多客户端
