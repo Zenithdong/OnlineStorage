@@ -1,131 +1,178 @@
-# 服务端文档 (Server)
+<div align="center">
 
-## 主体类架构
+# 🧠 Server — 服务端技术文档
+
+**OnlineStorage 服务端内部架构 · 接口 · 协议 完整说明**
+
+</div>
+
+---
+
+## 🏛️ 类层次结构
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                         main.cpp                            │
-│                       (程序入口)                             │
-└────────────────────────────┬────────────────────────────────┘
-                             │
-         ┌───────────────────┼───────────────────┐
-         ▼                   ▼                   ▼
-┌──────────────┐    ┌──────────────┐    ┌──────────────┐
-│   kernel     │    │   TCPNet     │    │   CMySQL     │
-│  (核心层)     │    │  (网络通信)   │    │   (数据库)    │
-└──────┬───────┘    └──────────────┘    └──────────────┘
-       │                   ▲
-       │                   │
-       └───────────────────┘
-            继承 INet 接口
+╔══════════════════════════════════════════════════════════════╗
+║                      main.cpp  (入口)                         ║
+╚══════════════════════════════╤═══════════════════════════════╝
+                               │ 调用
+╔══════════════════════════════▼═══════════════════════════════╗
+║                   kernel  （饿汉式单例）                       ║
+║                    implements  IKernel                        ║
+║                                                              ║
+║   open()  ──────────────────────────────────────────────     ║
+║     ├──► 🌐 TCPNet::InitNetWork()   启动监听 :8899           ║
+║     └──► 🗃️ CMySQL::ConnectMySql()  连接数据库               ║
+║                                                              ║
+║   dealData(SOCKET, char*)  ◄─── ThreadSelect 回调（待接入）  ║
+║     └──► 按 STRU_BASE::m_nType 路由到各业务函数               ║
+╚═══════════════╤══════════════════════╤════════════════════════╝
+                │                      │
+╔═══════════════▼══════╗  ╔════════════▼═══════════════════════╗
+║   🌐 TCPNet           ║  ║   🗃️ CMySQL                        ║
+║   implements  INet    ║  ║                                    ║
+║                       ║  ║  ConnectMySql()  连接              ║
+║  InitNetWork()        ║  ║  DisConnect()    断开              ║
+║  UnitNetWork()        ║  ║  SelectMysql()   SELECT 查询       ║
+║  sendData()           ║  ║  UpdateMysql()   增删改            ║
+║  recvData()           ║  ║                                    ║
+║  [ThreadSelect]       ║  ╚════════════════════════════════════╝
+╚═══════════════════════╝
 ```
 
-## 核心类说明
+---
 
-### kernel（核心业务层）
+## 🧩 核心类说明
 
-负责统一管理网络层和数据库层，采用单例模式。
+### 🔷 kernel — 核心业务层
+
+> 采用**饿汉式单例**，统筹管理网络与数据库的生命周期，是所有业务逻辑的入口。
+
+| 方法 | 签名 | 说明 |
+|------|------|------|
+| `GetKernel()` | `static IKernel*` | 获取单例实例 |
+| `open()` | `bool` | 初始化网络监听 + 数据库连接 |
+| `close()` | `void` | 停止网络线程，断开数据库 |
+| `dealData()` | `void(SOCKET, const char*)` | ⚡ 协议路由入口（待实现） |
+
+```cpp
+// 正确启动姿势
+kernel::GetKernel()->open();
+```
+
+---
+
+### 🌐 TCPNet — 网络通信层
+
+> 基于 **Winsock2** 封装，`select()` 模型实现单线程多客户端并发。
 
 | 方法 | 说明 |
 |------|------|
-| `GetKernel()` | 获取单例实例 |
-| `open()` | 初始化网络和数据库连接 |
-| `close()` | 关闭所有连接 |
-| `dealData()` | 处理客户端请求 |
+| `InitNetWork()` | 初始化 Winsock，绑定并监听 `:8899` |
+| `UnitNetWork()` | 优雅关闭所有套接字 |
+| `sendData(sock, buf, len)` | 发送数据（长度前缀协议） |
+| `recvData(sock, buf, len)` | 接收定长数据 |
 
-### TCPNet（网络通信类）
-
-负责 TCP 连接的建立和数据收发，继承自 INet 接口。
-
-| 方法 | 说明 |
-|------|------|
-| `InitNetWork()` | 初始化网络，绑定端口 8899 |
-| `UnitNetWork()` | 关闭网络连接 |
-| `sendData()` | 发送数据（长度前缀协议） |
-| `recvData()` | 接收数据 |
-
-- 使用 `select()` 模型处理多客户端
-- 默认端口：**8899**
-- 内部线程：`ThreadSelect` 监控套接字事件
-
-### INet（网络接口基类）
-
-定义网络层统一接口。
-
-### CMySQL（数据库类）
-
-负责与 MySQL 数据库的连接和操作。
-
-| 方法 | 说明 |
-|------|------|
-| `ConnectMySql()` | 连接数据库 |
-| `DisConnect()` | 断开连接 |
-| `SelectMysql()` | 执行 SELECT 查询 |
-| `UpdateMysql()` | 执行 INSERT/UPDATE/DELETE |
-
-## 协议包定义 (packdef.h)
-
-### 注册协议
-
-| 结构体 | 说明 |
-|--------|------|
-| `STRU_REGISTER_RQ` | 注册请求（用户名、密码、手机号） |
-| `STRU_REGISTER_RS` | 注册响应（结果） |
-
-### 登录协议
-
-| 结构体 | 说明 |
-|--------|------|
-| `STRU_LOGIN_RQ` | 登录请求（用户名、密码） |
-| `STRU_LOGIN_RS` | 登录响应（结果、用户ID） |
-
-### 文件操作协议
-
-| 结构体 | 说明 |
-|--------|------|
-| `STRU_GETFILELIST_RQ/RS` | 获取文件列表 |
-| `STRU_UPLOADFILEINFO_RQ/RS` | 上传文件信息 |
-| `STRU_UPLOADFILECONTENT_RQ/RS` | 上传文件内容 |
-| `STRU_DELETEFILE_RQ/RS` | 删除文件 |
-| `STRU_DOWNFILEINFO_RQ/RS` | 下载文件信息 |
-| `STRU_DOWNFILECONTENT_RQ/RS` | 下载文件内容 |
-
-## 目录结构
-
+**内部线程 `ThreadSelect` 工作流：**
 ```
-Server/
-├── main.cpp              # 程序入口
-├── packdef.h             # 协议包定义
-├── netWork/
-│   ├── INet.h            # 网络接口基类
-│   ├── tcpnet.h          # 网络类头文件
-│   └── tcpnet.cpp        # 网络类实现
-├── CMySQL/
-│   ├── cmysql.h          # 数据库类头文件
-│   └── cmysql.cpp        # 数据库类实现
-├── Kernel/
-│   ├── IKernel.h         # 内核接口基类
-│   ├── kernel.h          # 核心层头文件
-│   └── kernel.cpp        # 核心层实现
-└── README.md             # 本文档
+┌─────────────────────────────────────────────────────┐
+│  while(running)                                     │
+│    select(fdSet)  ← 监控所有已连接 socket           │
+│      ├─ 新连接   → accept() → 加入 fdSet            │
+│      └─ 可读数据 → recv() → [待接入 dealData()]     │
+└─────────────────────────────────────────────────────┘
 ```
 
-## 构建与运行
+---
+
+### 🗃️ CMySQL — 数据库访问层
+
+> 封装 **MySQL Connector/C**，提供简洁的查询与更新接口。
+
+| 方法 | 签名 | 说明 |
+|------|------|------|
+| `ConnectMySql()` | `bool(host, user, pwd, db)` | 建立连接 |
+| `DisConnect()` | `void` | 关闭连接，释放资源 |
+| `SelectMysql()` | `bool(sql, nCol, list&)` | SELECT，结果按列平铺入 `list` |
+| `UpdateMysql()` | `bool(sql)` | INSERT / UPDATE / DELETE |
+
+```cpp
+// 查询示例
+std::list<std::string> result;
+db.SelectMysql("SELECT name FROM users WHERE id=1", 1, result);
+```
+
+---
+
+## 📦 协议包定义 (packdef.h)
+
+### 数据包结构
+
+```
+ 0        3 4                          N
+ ┌─────────┬──────────────────────────┐
+ │ Length  │        Payload           │
+ │  int32  │  STRU_BASE 结构体内存块  │
+ └─────────┴──────────────────────────┘
+                   │
+              m_nType 字段
+                   │
+     ┌─────────────┼──────────────┐
+     ▼             ▼              ▼
+  注册(1/2)    登录(3/4)    文件操作(5~16)
+```
+
+### 已定义协议结构体
+
+#### 👤 用户模块
+
+| 结构体 | Type | 字段 |
+|--------|:----:|------|
+| `STRU_REGISTER_RQ` | 1 | 用户名、密码、手机号 |
+| `STRU_REGISTER_RS` | 2 | 结果码 |
+| `STRU_LOGIN_RQ` | 3 | 用户名、密码 |
+| `STRU_LOGIN_RS` | 4 | 结果码、用户 ID |
+
+#### 📁 文件模块（结构体待实现）
+
+| 结构体 | Type | 功能 |
+|--------|:----:|------|
+| `STRU_GETFILELIST_RQ/RS` | 5/6 | 获取文件列表 |
+| `STRU_UPLOADFILEINFO_RQ/RS` | 7/8 | 上传文件元信息 |
+| `STRU_UPLOADFILECONTENT_RQ/RS` | 9/10 | 上传文件内容（分块）|
+| `STRU_DELETEFILE_RQ/RS` | 11/12 | 删除文件 |
+| `STRU_DOWNFILEINFO_RQ/RS` | 13/14 | 下载文件元信息 |
+| `STRU_DOWNFILECONTENT_RQ/RS` | 15/16 | 下载文件内容（分块）|
+
+---
+
+## ⚙️ 配置项
+
+| 配置项 | 位置 | 默认值 |
+|--------|------|--------|
+| 数据库连接 | `kernel.cpp:39` | `127.0.0.1 / root / 1114 / server` |
+| 监听端口 | `tcpnet.cpp` | `8899` |
+| MySQL 头文件路径 | `tasks.json / CMakeLists.txt` | `C:/Program Files/MySQL/MySQL Server 8.0/` |
+
+---
+
+## 🏗️ 构建与运行
 
 ### 环境要求
 
-- Windows 操作系统
-- MinGW-w64 编译器
-- MySQL Server 8.0
-- 依赖库：Winsock2、MySQL Connector/C
+```
+✔  Windows 10/11
+✔  MinGW-w64 (g++ ≥ 8，支持 C++17)
+✔  MySQL Server 8.0
+✔  libmysql.dll  （已内置于 Server/ 目录）
+```
 
-### VSCode 构建
-
-按 `Ctrl+Shift+B` 执行构建。
-
-### CMake 构建
+### 构建
 
 ```bash
+# VSCode 一键构建
+Ctrl + Shift + B
+
+# CMake
 mkdir build && cd build
 cmake ..
 cmake --build .
@@ -133,23 +180,29 @@ cmake --build .
 
 ### 运行
 
-1. 确保 MySQL 服务运行中
-2. 配置数据库连接参数（在 kernel.cpp 中修改）
-3. 运行 `Server.exe`
-4. 服务端监听端口 8899
+```bash
+# 1. 启动 MySQL 服务
+# 2. 修改 kernel.cpp:39 填入正确的数据库凭证
+# 3. 启动服务端
+./Server.exe
+# → 监听 0.0.0.0:8899
+```
 
-## 网络协议
+---
 
-### 数据包格式
+## 🔮 后续开发路线
 
-| 字节 | 内容 |
-|------|------|
-| 0-3 | 包长度 (int) |
-| 4-? | 包内容 |
+```
+[当前]
+  main.cpp 直接实例化 TCPNet（已绕过 kernel）
+      ↓ 待修复
+[目标]
+  main.cpp → kernel::GetKernel()->open()
+                  ├── TCPNet（初始化网络）
+                  └── CMySQL（连接数据库）
 
-### 通信流程
-
-1. 客户端连接 `ServerIP:8899`
-2. 客户端发送：长度(4字节) + 内容
-3. 服务器接收并处理
-4. 服务器可选择发送响应
+  ThreadSelect 收包后 → kernel::dealData() 路由
+      ├── type 1/2 → 注册业务
+      ├── type 3/4 → 登录业务
+      └── type 5~16 → 文件操作业务（待实现）
+```
