@@ -1,7 +1,7 @@
 #ifndef TCPNET_H
 #define TCPNET_H
 
-#include <winsock2.h>
+#include "INet.h"
 #include <cstdio>
 #include <list>
 #include <map>
@@ -9,7 +9,7 @@
 
 #pragma comment(lib, "ws2_32.lib")
 
-class TCPNet
+class TCPNet : public INet
 {
 public:
     TCPNet();

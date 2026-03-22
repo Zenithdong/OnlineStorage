@@ -25,6 +25,7 @@ set(SOURCE_FILES
     Server/main.cpp
     Server/netWork/tcpnet.cpp
     Server/CMySQL/cmysql.cpp
+    Server/Kernel/kernel.cpp
 )
 
 add_executable(Server ${SOURCE_FILES})
