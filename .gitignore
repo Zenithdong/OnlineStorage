@@ -1,0 +1,53 @@
+# ─── 构建产物 ───
+build/
+build-*/
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.a
+*.lib
+
+# ─── qmake 生成的 Makefile ───
+Makefile
+Makefile.Debug
+Makefile.Release
+
+# ─── Qt 生成文件 ───
+moc_*.cpp
+moc_*.h
+qrc_*.cpp
+ui_*.h
+*.pro.user
+*.pro.user.*
+
+# ─── Claude Code ───
+.claude/
+
+# ─── IDE / 编辑器 ───
+.vs/
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ─── 敏感信息 ───
+.env
+*.pem
+*.key
+
+# ─── 磁盘文件存储（运行时数据） ───
+disk_file/*/
+
+# ─── CMake 构建（如有） ───
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+CTestTestfile.cmake
+
+# ─── 日志 ───
+*.log

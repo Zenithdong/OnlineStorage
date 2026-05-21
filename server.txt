@@ -1,0 +1,47 @@
+create table file
+(
+    f_id         bigint auto_increment
+        primary key,
+    f_name       varchar(45)                        not null,
+    f_size       bigint   default 0                 null,
+    f_uploadtime datetime default CURRENT_TIMESTAMP null,
+    f_path       varchar(260)                       not null,
+    f_count      bigint   default 1                 null,
+    f_md5        varchar(45)                        null
+);
+
+create table user
+(
+    u_id       bigint auto_increment
+        primary key,
+    u_name     varchar(45) not null,
+    u_password varchar(45) not null,
+    u_tel      bigint      not null,
+    constraint u_tel_UNIQUE
+        unique (u_tel),
+    constraint usercol_UNIQUE
+        unique (u_name)
+);
+
+create table user_file
+(
+    num  bigint auto_increment,
+    u_id bigint   not null,
+    f_id bigint   not null,
+    time datetime not null,
+    primary key (u_id, f_id),
+    constraint num_UNIQUE
+        unique (num)
+);
+
+create definer = root@localhost view ufile as
+select `server`.`user_file`.`u_id` AS `u_id`,
+       `server`.`file`.`f_id`      AS `f_id`,
+       `server`.`file`.`f_name`    AS `f_name`,
+       `server`.`file`.`f_size`    AS `f_size`,
+       `server`.`user_file`.`time` AS `f_uploadtime`,
+       `server`.`file`.`f_path`    AS `f_path`,
+       `server`.`file`.`f_count`   AS `f_count`,
+       `server`.`file`.`f_md5`     AS `f_md5`
+from (`server`.`user_file` left join `server`.`file` on ((`server`.`user_file`.`f_id` = `server`.`file`.`f_id`)));
+

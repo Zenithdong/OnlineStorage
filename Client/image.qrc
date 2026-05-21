@@ -1,0 +1,14 @@
+<RCC>
+    <qresource prefix="/">
+        <file>audi43.png</file>
+        <file>icon.png</file>
+        <file>jjy169.png</file>
+        <file>icon1.png</file>
+        <file>background916.jpg</file>
+        <file>home43.png</file>
+        <file>continueIcon.png</file>
+        <file>deleteIcon.png</file>
+        <file>selectIcon.png</file>
+        <file>updateIcon.png</file>
+    </qresource>
+</RCC>

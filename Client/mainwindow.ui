@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>900</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QMainWindow#MainWindow {
+    border-image: url(:/home43.png);
+}
+
+
+/* 表格整体 */
+QTableWidget#tableWidget {
+    background-color: transparent;
+    color: white;
+    border: none;
+    gridline-color: rgba(255, 255, 255, 80);
+}
+
+
+/* 表格单元格 */
+QTableWidget#tableWidget::item {
+    background-color: transparent;
+    border: none;
+    color: white;
+}
+
+
+/* 表格选中后的颜色 */
+QTableWidget#tableWidget::item:selected {
+    background-color: rgba(80, 160, 255, 120);
+    color: white;
+}
+
+
+/* 表头 */
+QHeaderView::section {
+    background-color: transparent;
+    color: white;
+    border: none;
+}
+
+
+/* 菜单栏 */
+QMenuBar#menubar {
+    background-color: transparent;
+    color: white;
+    border: none;
+}
+
+
+/* 菜单栏里的每一项 */
+QMenuBar#menubar::item {
+    background-color: transparent;
+    color: white;
+}
+
+
+/* 菜单栏选中效果 */
+QMenuBar#menubar::item:selected {
+    background-color: rgba(255, 255, 255, 50);
+    color: white;
+}
+
+
+/* Action 不是常规可直接这样控制的控件，通常不用写 */
+QAction {
+    background-color: transparent;
+    border: none;
+    color: white;
+}
+
+
+/* 输入框 */
+QLineEdit {
+    background-color: rgba(167, 167, 167, 100);
+    color: white;
+    border: none;
+}
+
+
+/* 按钮 */
+QPushButton {
+    border: none;
+    border-radius: 100px;
+    color: white;
+    background-color: rgba(0, 0, 0, 80);
+}
+
+
+/* 按钮悬停 */
+QPushButton:hover {
+    background-color: rgba(255, 255, 255, 50);
+}
+
+
+/* 按钮按下 */
+QPushButton:pressed {
+    background-color: rgba(0, 0, 0, 150);
+}
+
+
+/* 按钮图标 */
+QPushButton#Select{
+	border-image: url(:/selectIcon.png);
+}
+QPushButton#Update{
+	border-image: url(:/updateIcon.png);
+}
+QPushButton#Delete{
+	border-image: url(:/deleteIcon.png);
+}</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout_2">
+    <item row="0" column="0">
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="0">
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <spacer name="horizontalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Orientation::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lineEdit">
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>25</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="Select">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>25</width>
+            <height>25</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="Update">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>25</width>
+            <height>25</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="Delete">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>25</width>
+            <height>25</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Orientation::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item row="1" column="0">
+       <widget class="QTableWidget" name="tableWidget">
+        <property name="selectionMode">
+         <enum>QAbstractItemView::SelectionMode::SingleSelection</enum>
+        </property>
+        <property name="selectionBehavior">
+         <enum>QAbstractItemView::SelectionBehavior::SelectRows</enum>
+        </property>
+        <attribute name="verticalHeaderVisible">
+         <bool>false</bool>
+        </attribute>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>900</width>
+     <height>18</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu">
+    <property name="title">
+     <string>文件</string>
+    </property>
+    <addaction name="action_2"/>
+    <addaction name="action_3"/>
+   </widget>
+   <widget class="QMenu" name="menu_2">
+    <property name="title">
+     <string>分享</string>
+    </property>
+    <addaction name="action"/>
+    <addaction name="actionSend_File"/>
+   </widget>
+   <addaction name="menu"/>
+   <addaction name="menu_2"/>
+  </widget>
+  <action name="action">
+   <property name="icon">
+    <iconset theme="QIcon::ThemeIcon::DocumentOpen"/>
+   </property>
+   <property name="text">
+    <string>获取链接</string>
+   </property>
+  </action>
+  <action name="action_2">
+   <property name="icon">
+    <iconset theme="QIcon::ThemeIcon::GoUp"/>
+   </property>
+   <property name="text">
+    <string>上传文件</string>
+   </property>
+  </action>
+  <action name="action_3">
+   <property name="icon">
+    <iconset theme="QIcon::ThemeIcon::GoDown"/>
+   </property>
+   <property name="text">
+    <string>下载文件</string>
+   </property>
+  </action>
+  <action name="actionSend_File">
+   <property name="icon">
+    <iconset theme="QIcon::ThemeIcon::WindowNew"/>
+   </property>
+   <property name="text">
+    <string>Extract link</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
