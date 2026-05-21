@@ -127,7 +127,8 @@ Online_storage/
 │       └── CMySQL.pri
 │
 ├── 📁 disk_file/                   # 服务器文件存储根目录
-├── 📄 server.txt                   # MySQL 建表 SQL
+├── 📁 sql/                         # 数据库初始化脚本
+│   └── 📄 init.sql                  #   CREATE DATABASE + 建表
 ├── 📄 README.md                    # 本文件
 ├── 📄 CLAUDE.md                    # Claude Code 指导文件
 ├── 📄 Client/CLAUDE.md             # 客户端 Claude Code 指导
@@ -208,7 +209,7 @@ CREATE DATABASE server;
 USE server;
 
 -- 导入表结构
-source server.txt;
+source sql/init.sql;
 ```
 
 修改服务器数据库连接配置（`Server/Kernel/kernel.cpp:42`）：
@@ -250,7 +251,7 @@ qmake Client.pro && mingw32-make
 | **[Server/DOCS.md](Server/DOCS.md)** | 服务器端各模块详细代码分析 |
 | **[Client/DOCS.md](Client/DOCS.md)** | 客户端各模块详细代码分析 |
 | **[CLAUDE.md](CLAUDE.md)** | Claude Code AI 助手指南 |
-| **[server.txt](server.txt)** | 数据库表结构 DDL |
+| **[sql/init.sql](sql/init.sql)** | 数据库初始化脚本（建库 + 建表） |
 
 ---
 
