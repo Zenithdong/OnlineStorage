@@ -54,6 +54,8 @@ public:
 
     void GetLinkRq(SOCKET socketWaiter, const char *szbuf);
 
+    void DownLoadFileRq(SOCKET socketWaiter, const char *szbuf);
+
 private:
     INet*   m_pNet;             // 网络层接口指针（实际指向 TCPNet 实例）
     CMySql* m_pSql;             // 数据库层指针

@@ -85,6 +85,10 @@ void kernel::dealData(SOCKET socketWaiter, const char* szbuf)
         break;
     case _default_protocol_getlink_rq:
         GetLinkRq(socketWaiter, szbuf);
+        break;
+    case _default_protocol_downloadfileinfo_rq:
+        DownLoadFileRq(socketWaiter, szbuf);
+        break;
     default:
         break;
     }
@@ -473,4 +477,26 @@ void kernel::GetLinkRq(SOCKET socketWaiter, const char *szbuf)
 
     //返还给客户端
     m_pNet->sendData(socketWaiter, (char*)&sgs, sizeof(sgs));
+}
+
+void kernel::DownLoadFileRq(SOCKET socketWaiter, const char *szbuf)
+{
+    STRU_DOWNLOADFILE_RQ *psdq = (STRU_DOWNLOADFILE_RQ*)szbuf;
+    STRU_DOWNLOADFILE_RS sds;
+    char szsql[SQLLEN] = {0};
+    list<string> lsStr;
+    sprintf(szsql,"select f_path from ufile where u_id = %lld and f_name = '%s'", psdq->userId, psdq->szFileName);
+    m_pSql->SelectMysql(szsql,1,lsStr);
+    if(lsStr.size() > 0) {
+        //向客户端返还文件内容
+        string filePath = lsStr.front();
+        lsStr.pop_front();
+        FILE* pFile = fopen(filePath.c_str(),"rb");
+        int num;
+        while((num = fread(sds.m_FileContent,1,ONE_PAGE,pFile))>0){
+            sds.m_fileNum = num;
+            m_pNet->sendData(socketWaiter,(char*)&sds,sizeof(sds));
+        }
+        fclose(pFile);
+    }
 }

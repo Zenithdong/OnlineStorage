@@ -44,6 +44,7 @@ private slots:
     void SelectFileRs(const char* szbuf);
     void ShareLinkRs(const char* szbuf);
     void GetLinkRs(const char* szbuf);
+    void DownLoadFileRs(const char* szbuf);
     void on_action_2_triggered();
 
     void on_Select_clicked();
@@ -54,6 +55,8 @@ private slots:
 
     void on_actionSend_File_triggered();
 
+    void on_action_3_triggered();
+
 private:
     Ui::MainWindow *ui;
     IKernel* m_pKernel;
@@ -61,6 +64,7 @@ private:
     long long Id;
     std::list<uploadFileInfo*> m_lstuploadFileInfo;
     Dialog* m_pDialog;
-
+    string filePath;
+    int m_pos;
 };
 #endif // MAINWINDOW_H

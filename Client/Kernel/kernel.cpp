@@ -59,5 +59,8 @@ void Kernel::DealData(const char *szbuf)
     case _default_protocol_getlink_rs:
         emit GetLinkRs(szbuf);
         break;
+    case _default_protocol_downloadfileinfo_rs:
+        emit DownLoadFileRs(szbuf);
+        break;
     }
 }

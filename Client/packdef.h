@@ -32,8 +32,8 @@
 #define _default_protocol_deletefile_rs     _default_protocol_base + 12
 
 // 下载文件信息（文件名、大小等元数据）
-#define _default_protocol_downfileinfo_rq   _default_protocol_base + 13
-#define _default_protocol_downfileinfo_rs   _default_protocol_base + 14
+#define _default_protocol_downloadfileinfo_rq   _default_protocol_base + 13
+#define _default_protocol_downloadfileinfo_rs   _default_protocol_base + 14
 
 // 下载文件内容（实际文件数据分块传输）
 #define _default_protocol_downfilecontent_rq    _default_protocol_base + 15
@@ -250,4 +250,23 @@ struct STRU_GETLINK_RS:public STRU_BASE{
     long long szFileSize;
     char szResult;
 };
+
+//下载文件
+struct STRU_DOWNLOADFILE_RS : public STRU_BASE {
+    STRU_DOWNLOADFILE_RS(){
+        m_nType = _default_protocol_downloadfileinfo_rs;
+    }
+    char m_FileContent[ONE_PAGE];//文件内容数组
+    long m_fileNum; //真正上传文件大小
+};
+
+struct STRU_DOWNLOADFILE_RQ : public STRU_BASE {
+    STRU_DOWNLOADFILE_RQ(){
+        m_nType = _default_protocol_downloadfileinfo_rq;
+    }
+    long long userId;
+    char szFileName[MAX_SIZE];
+};
+
+
 #endif // PACKDEF_H

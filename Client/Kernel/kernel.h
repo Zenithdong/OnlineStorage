@@ -27,6 +27,7 @@ signals:
     void SelectFileRs(const char* szbuf);
     void ShareLinkRs(const char* szbuf);
     void GetLinkRs(const char* szbuf);
+    void DownLoadFileRs(const char* szbuf);
 private:
     INet* m_pNet;
 };

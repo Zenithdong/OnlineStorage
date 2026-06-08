@@ -17,6 +17,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_pLogin->setWindowTitle("Login Windows");
     m_pLogin->setWindowIcon(QIcon(":/icon.png"));
     m_pLogin->show();
+    m_pos = 0;
     connect((Kernel*)m_pKernel, &Kernel::LoginRs, this, &MainWindow::LoginRs,Qt::BlockingQueuedConnection);
     connect((Kernel*)m_pKernel, &Kernel::RegisterRs, m_pLogin, &Login::RegisterRs,Qt::BlockingQueuedConnection);
     connect((Kernel*)m_pKernel, &Kernel::GetFileLisRs, this, &MainWindow::GetFileLisRs,Qt::BlockingQueuedConnection);
@@ -24,6 +25,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect((Kernel*)m_pKernel, &Kernel::SelectFileRs, this, &MainWindow::SelectFileRs,Qt::BlockingQueuedConnection);
     connect((Kernel*)m_pKernel, &Kernel::ShareLinkRs, this, &MainWindow::ShareLinkRs,Qt::BlockingQueuedConnection);
     connect((Kernel*)m_pKernel, &Kernel::GetLinkRs, this, &MainWindow::GetLinkRs,Qt::BlockingQueuedConnection);
+    connect((Kernel*)m_pKernel, &Kernel::DownLoadFileRs, this, &MainWindow::DownLoadFileRs,Qt::BlockingQueuedConnection);
 }
 
 MainWindow::~MainWindow()
@@ -229,6 +231,20 @@ void MainWindow::GetLinkRs(const char *szbuf)
     }
 }
 
+void MainWindow::DownLoadFileRs(const char *szbuf)
+{
+    STRU_DOWNLOADFILE_RS* psds = (STRU_DOWNLOADFILE_RS*)szbuf;
+    //保存的文件路径
+    FILE* pFile = fopen(filePath.c_str(),"ab");
+    fseek(pFile,m_pos, SEEK_SET);
+    int WriteNum = fwrite(psds->m_FileContent,1,psds->m_fileNum,pFile);
+    if (WriteNum > 0) {
+        m_pos += WriteNum;
+
+    }
+    fclose(pFile);
+}
+
 void MainWindow::on_action_2_triggered()
 {
     qDebug()<<"上传文件被点击了";
@@ -328,5 +344,26 @@ void MainWindow::on_actionSend_File_triggered()
         strcpy_s(sgq.szCode,m_pDialog->m_code.c_str());
     }
     m_pKernel->SendData((char*)&sgq, sizeof(sgq));
+}
+
+
+void MainWindow::on_action_3_triggered()
+{
+    STRU_DOWNLOADFILE_RQ sdr;
+
+    //先获取文件信息
+    int nRow = ui->tableWidget->currentRow();
+    if(nRow == -1)
+        return;
+    filePath = QFileDialog::getSaveFileName(this, tr("下载文件"),
+                                                    "./newDownFile.png",
+                                                    tr("Images (*.png *.xpm *.jpg);;All Files(*.*);;"
+                                                       "Text files (*.txt);;XML files (*.xml)")).toStdString();
+
+    //文件名字与用户id组合发送至服务器
+    string fileName = ui->tableWidget->item(nRow,0)->text().toStdString();
+    sdr.userId = Id;
+    strcpy_s(sdr.szFileName,fileName.c_str());
+    m_pKernel->SendData((char*)&sdr,sizeof(sdr));
 }
 
