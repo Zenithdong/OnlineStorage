@@ -1,0 +1,36 @@
+# ===== 构建产物 =====
+*.o
+*.d
+moc_*.cpp
+moc_predefs.h
+qrc_*.cpp
+ui_*.h
+Makefile
+Makefile.Debug
+Makefile.Release
+.qmake.stash
+
+# ===== 构建目录 =====
+build/
+cmake_build/
+debug/
+release/
+
+# ===== Qt Creator =====
+.qtcreator/
+*.pro.user
+*.pro.user.*
+
+# ===== 运行时文件存储（用户上传的文件，不进版本库）=====
+disk_file/
+
+# ===== 可执行文件 =====
+Client/Client
+
+# ===== IDE / 工具本地配置 =====
+.claude/
+.vscode/
+
+# ===== 其他 =====
+*~
+.DS_Store
