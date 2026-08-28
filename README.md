@@ -387,8 +387,8 @@ Permission is hereby granted, free of charge, to any person obtaining a copy ...
 
 ## 📮 联系方式
 
-- 项目仓库：本地开发环境（`/home/zenith/workspace/Online_storage`），尚未托管到远程。
-- 问题反馈：可在仓库提交 Issue，或联系维护者。
+- 项目仓库：<https://github.com/Zenithdong/OnlineStorage>
+- 问题反馈：可在仓库提交 Issue。
 
 ---
 
